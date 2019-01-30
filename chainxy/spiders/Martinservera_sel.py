@@ -142,13 +142,13 @@ class Martinservera_sel(scrapy.Spider):
 				
 				self.source_list.append(source)
 
-			# for source in self.source_list:
+				# for source in self.source_list:
 
 				item = ChainItem()
 
-				item['Product_Name'] = ''.join(self.eliminate_space(source.xpath('//div[contains(@class, "content-top")]//h1[contains(@class, "product-title")]//text()')))
+				item['Product_Name'] = ''.join(self.eliminate_space(source.xpath('//div[@class="ms-bootstrap-modal modal fade product-detail-modal show"]//div[contains(@class, "content-top")]//h1[contains(@class, "product-title")]//text()')))
 				
-				data = source.xpath('//*[contains(@class, "data-pair-item")]')
+				data = source.xpath('//div[@class="ms-bootstrap-modal modal fade product-detail-modal show"]//*[contains(@class, "data-pair-item")]')
 
 				for prop in data:
 
