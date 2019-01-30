@@ -21,6 +21,12 @@ from scrapy.xlib.pydispatch import dispatcher
 
 from selenium import webdriver
 
+from selenium.webdriver.common.by import By
+
+from selenium.webdriver.support.ui import WebDriverWait
+
+import selenium.webdriver.support.expected_conditions as EC
+
 from lxml import etree
 
 from lxml import html
@@ -30,15 +36,6 @@ import math
 import time
 
 import pdb
-
-from selenium.webdriver.common.by import By
-
-from selenium.webdriver.support.ui import WebDriverWait
-
-# from selenium.webdriver.support import expected_conditions as ec
-
-import selenium.webdriver.support.expected_conditions as EC
-
 
 
 class Martinservera_sel(scrapy.Spider):
@@ -70,79 +67,37 @@ class Martinservera_sel(scrapy.Spider):
 
 	def parse(self, response):
 
-		self.driver.get('https://www.martinservera.se/Produktkatalog/09')
+		self.driver.get('https://www.martinservera.se/Produktkatalog/10')
 
 		time.sleep(5)
 
 		index = 0
 
-		page_limit = 189
+		page_limit = 84
 
 		while True:
-
-			self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/5);")
-
-			time.sleep(2)
-
-			self.driver.execute_script("window.scrollTo(0, 2*document.body.scrollHeight/5);")
-
-			time.sleep(2)
 
 			self.driver.execute_script("window.scrollTo(0, 3*document.body.scrollHeight/5);")
 
 			time.sleep(2)
 
-			self.driver.execute_script("window.scrollTo(0, 4*document.body.scrollHeight/5);")
-
-			time.sleep(2)
-
-			self.driver.execute_script("window.scrollTo(0, 5*document.body.scrollHeight/5);")
-
-			time.sleep(2)
-
 			product_list = self.driver.find_elements_by_xpath('//div[contains(@class, "product-tile product-has-data")]//a[contains(@class, "product-image-wrap pdp-modal-link")]')
 
-			# product_list = self.driver.find_elements_by_xpath('//div[@class="product-list row"]/div')
-
-			self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/6);")
+			self.driver.execute_script("window.scrollTo(0, 1*document.body.scrollHeight/7);")
 
 			time.sleep(2)
 
 			for idx, product in enumerate(product_list):
 
-				idx = idx + 1
-
-				# try:
-
-				if idx / 4 == 1 :
-					self.driver.execute_script("window.scrollTo(0, 2*document.body.scrollHeight/6);")
-
-				if idx / 4 == 2 :
-					self.driver.execute_script("window.scrollTo(0, 3*document.body.scrollHeight/6);")
-
-				if idx / 4 == 3 :
-					self.driver.execute_script("window.scrollTo(0, 4*document.body.scrollHeight/6);")
-
-				if idx / 4 == 4 :
-					self.driver.execute_script("window.scrollTo(0, 5*document.body.scrollHeight/6);")
-
-
-				if idx / 4 == 5 :
-					self.driver.execute_script("window.scrollTo(0, 6*document.body.scrollHeight/6);")
-
-				time.sleep(4)
-
 				product.click()
 
-				time.sleep(4)
+				time.sleep(2)
 
 				source = self.driver.page_source.encode("utf8")
 
 				source = etree.HTML(source)
 				
 				self.source_list.append(source)
-
-				# for source in self.source_list:
 
 				item = ChainItem()
 
@@ -198,23 +153,21 @@ class Martinservera_sel(scrapy.Spider):
 
 					except Exception as e:
 
-						print('~~~~~~~~~~~~~~~', e)
-
 						pass
 
 				yield item
 
-				WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@class="ms-bootstrap-modal modal fade product-detail-modal show"]//span[@class="ms-popup-close"]'))).click()
+				try:
 
-				# except Exception as e:
+					WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@class="ms-bootstrap-modal modal fade product-detail-modal show"]//span[@class="ms-popup-close"]'))).click()
 
-				# 	print('~~~~~~~~~~~~~~~', e)
+				except Exception as e:
 
-				# 	pdb.set_trace()
+					pass
 
-				# 	time.sleep(3)
+			self.driver.execute_script("window.scrollTo(0, 0);")
 
-				# 	pass
+			time.sleep(2)
 
 			self.driver.find_element_by_xpath('//div[@class="pagination-list-item next"]//a[@class="await-body-loaded pagination-list-link"]').click()
 
@@ -223,10 +176,8 @@ class Martinservera_sel(scrapy.Spider):
 			index += 1
 
 			if index >= page_limit:
+
 				break;
-
-
-
 
 	def validate(self, item):
 

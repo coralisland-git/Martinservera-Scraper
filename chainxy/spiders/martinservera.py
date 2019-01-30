@@ -52,17 +52,39 @@ class Martinservera(scrapy.Spider):
 		
 		yield scrapy.Request(url, callback=self.parse)
 
-
 	def parse(self, response):
 
-		product_list = response.xpath('//div[contains(@class, "product-tile product-has-data")]')
+		product_list = response.xpath('//div[@class="name-remark-wrap"]//a[@class="product-name pdp-modal-link"]/@href').extract()
 
 		for product in product_list:
-			
-			url = 'https://www.martinservera.se/produkter/541920/monin-mojito-70cl?OpenAsDialog=true&ajaxRequestMarker=true'
 
-			yield scrapy.Request(url, callback=self.parse_detail)
+			try:
 
+				if product not in self.history:
+
+					yield scrapy.Request(product, callback=self.parse_detail)
+
+					self.history.append(product)
+
+			except Exception as e:
+
+				print('~~~~~~', e)
+
+				pass
+
+		try:
+		
+			next_page = self.validate(response.xpath('//div[@class="pagination-list-item next"]//a[@class="await-body-loaded pagination-list-link"]//@data-href').extract_first())
+
+			if next_page:
+
+				yield scrapy.Request(next_page, callback=self.parse)
+
+		except Exception as e:
+
+			print('~~~~~~~~', e)
+
+			pass
 
 	def parse_detail(self, response):
 
@@ -72,52 +94,56 @@ class Martinservera(scrapy.Spider):
 		
 		data = response.xpath('//*[contains(@class, "data-pair-item")]')
 
-		for prop in data:
+		for pro in data:
 
-			prop = self.eliminate_space(prop.xpath('.//text()').extract())
+			try:
 
-			if 'Bruttovikt'.lower() in prop[0].lower():
+				prop = self.eliminate_space(pro.xpath('.//text()').extract())
 
-				item['Weight'] = prop[1]
+				if 'Bruttovikt'.lower() in prop[0].lower():
 
-			if 'Enhet'.lower() in prop[0].lower():
+					item['Weight'] = prop[1]
 
-				item['Unit'] = prop[1]
+				if 'Enhet'.lower() in prop[0].lower():
 
-			if 'Antal per enhet'.lower() in prop[0].lower():
+					item['Unit'] = prop[1]
 
-				item['Number_Per_Unit'] = prop[1]
+				if 'Antal per enhet'.lower() in prop[0].lower():
 
-			if 'Lagringsform'.lower() in prop[0].lower():
+					item['Number_Per_Unit'] = prop[1]
 
-				item['Storage_Form'] = prop[1]
+				if 'Lagringsform'.lower() in prop[0].lower():
 
-			if 'Antal/hel'.lower() in prop[0].lower():
+					item['Storage_Form'] = prop[1]
 
-				item['Number_Whole_Package'] = prop[1]
+				if 'Antal/hel'.lower() in prop[0].lower():
 
-			if 'Art.nr leveran'.lower() in prop[0].lower():
+					item['Number_Whole_Package'] = prop[1]
 
-				item['Art_Nr_Supplier'] = prop[1]
+				if 'Art.nr leveran'.lower() in prop[0].lower():
 
-			if 'Artikelnr'.lower() in prop[0].lower():
+					item['Art_Nr_Supplier'] = prop[1]
 
-				item['Article_Number'] = prop[1]
+				if 'Artikelnr'.lower() in prop[0].lower():
 
-			if 'Land'.lower() in prop[0].lower():
+					item['Article_Number'] = prop[1]
 
-				item['Country'] = prop[1]
+				if 'Land'.lower() in prop[0].lower():
 
-			if 'GTIN'.lower() in prop[0].lower():
+					item['Country'] = prop[1]
 
-				item['GTIN'] = prop[1]
+				if 'GTIN'.lower() in prop[0].lower():
 
-			if 'Kategori'.lower() in prop[0].lower():
+					item['GTIN'] = prop[1]
 
-				item['Category'] = prop[1]
+				if 'Kategori'.lower() in prop[0].lower():
+
+					item['Category'] = prop[1]
+			except:
+
+				pass
 
 		yield item
-
 
 	def validate(self, item):
 
@@ -128,7 +154,6 @@ class Martinservera(scrapy.Spider):
 		except:
 
 			pass
-
 
 	def eliminate_space(self, items):
 

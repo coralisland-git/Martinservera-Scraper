@@ -28,7 +28,6 @@ class ChainxyPipeline(object):
 
         self.file_number = 0
 
-
     @classmethod
     def from_crawler(cls, crawler):
 
@@ -40,7 +39,6 @@ class ChainxyPipeline(object):
 
         return pipeline
 
-
     def spider_opened(self, spider):
 
         self.file = open('%s.csv' %spider.name, 'w+b')
@@ -51,13 +49,11 @@ class ChainxyPipeline(object):
         
         self.exporter.start_exporting()        
 
-
     def spider_closed(self, spider):
         
         self.exporter.finish_exporting()
         
         self.file.close()
-
 
     def process_item(self, item, spider):
 
