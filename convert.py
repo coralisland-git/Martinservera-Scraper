@@ -42,7 +42,7 @@ class UnicodeWriter:
         for row in rows:
             self.writerow(row)
 
-with open('martinservera_sel_test.csv','rb') as fin, open('martinservera_sel.csv','wb') as fout:
+with open('martinservera.csv','rb') as fin, open('martinservera_res.csv','wb') as fout:
     reader = UnicodeReader(fin)
     writer = UnicodeWriter(fout,quoting=csv.QUOTE_ALL)
     for line in reader:
